@@ -103,8 +103,8 @@ KnowledgeManager 是一个前后端分离的企业知识管理系统。后端基
 ### 2. 克隆并启动依赖
 
 ```bash
-git clone git@github.com:Yannnn22/knowledge-manager.git
-cd knowledge-manager
+git clone git@github.com:Yannnn22/Knowledge-Manager.git
+cd Knowledge-Manager
 
 # MySQL + Redis
 docker compose up -d
