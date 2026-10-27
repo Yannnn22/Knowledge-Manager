@@ -1,0 +1,153 @@
+{
+  "dataset_name": "RAG召回率测试数据集",
+  "version": "1.0",
+  "description": "用于测试RAG系统召回率和命中率的测试查询集合",
+  "created_date": "2026-07-21",
+  "test_queries": [
+    {
+      "id": "q001",
+      "query": "拼多多的社交电商模式和特点",
+      "expected_keywords": ["拼多多"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q002",
+      "query": "淘宝电商平台的主要优势",
+      "expected_keywords": ["淘宝"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q003",
+      "query": "京东自营物流配送服务",
+      "expected_keywords": ["京东"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q004",
+      "query": "抖音短视频直播带货",
+      "expected_keywords": ["抖音"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q005",
+      "query": "微信小程序电商购物",
+      "expected_keywords": ["微信"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q006",
+      "query": "电商用户增长策略",
+      "expected_keywords": ["增长", "用户"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q007",
+      "query": "电商营销活动策划",
+      "expected_keywords": ["营销", "活动"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q008",
+      "query": "电商数据分析方法",
+      "expected_keywords": ["数据", "分析"],
+      "query_type": "精准匹配",
+      "difficulty": "简单"
+    },
+    {
+      "id": "q009",
+      "query": "主流电商平台对比分析",
+      "expected_keywords": ["拼多多", "淘宝", "京东"],
+      "query_type": "多文档匹配",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q010",
+      "query": "社交电商平台有哪些",
+      "expected_keywords": ["拼多多", "抖音", "微信"],
+      "query_type": "多文档匹配",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q011",
+      "query": "电商运营策略大全",
+      "expected_keywords": ["增长", "营销", "数据"],
+      "query_type": "多文档匹配",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q012",
+      "query": "拼多多和淘宝的区别",
+      "expected_keywords": ["拼多多", "淘宝"],
+      "query_type": "对比查询",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q013",
+      "query": "京东和拼多多哪个更好",
+      "expected_keywords": ["京东", "拼多多"],
+      "query_type": "对比查询",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q014",
+      "query": "淘宝和京东对比",
+      "expected_keywords": ["淘宝", "京东"],
+      "query_type": "对比查询",
+      "difficulty": "中等"
+    },
+    {
+      "id": "q015",
+      "query": "短视频电商怎么做",
+      "expected_keywords": ["抖音"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    },
+    {
+      "id": "q016",
+      "query": "如何提升电商用户活跃度",
+      "expected_keywords": ["增长", "用户"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    },
+    {
+      "id": "q017",
+      "query": "电商促销活动怎么做",
+      "expected_keywords": ["营销", "活动"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    },
+    {
+      "id": "q018",
+      "query": "电商如何做数据分析",
+      "expected_keywords": ["数据", "分析"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    },
+    {
+      "id": "q019",
+      "query": "社交电商的发展趋势",
+      "expected_keywords": ["拼多多", "抖音", "微信"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    },
+    {
+      "id": "q020",
+      "query": "电商平台的用户留存方法",
+      "expected_keywords": ["增长", "用户"],
+      "query_type": "语义相似",
+      "difficulty": "困难"
+    }
+  ],
+  "evaluation_config": {
+    "top_k_values": [1, 3, 5, 10],
+    "metrics": ["recall", "hit_rate", "mrr"],
+    "retrieval_methods": ["vector", "bm25", "hybrid"]
+  }
+}

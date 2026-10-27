@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.MessageMapper">
+
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.Message">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="conversation_id" property="conversationId" jdbcType="BIGINT"/>
+        <result column="chat_id" property="chatId" jdbcType="VARCHAR"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
+        <result column="model" property="model" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, conversation_id, chat_id, role, content, model, created_at, is_deleted
+    </sql>
+
+    <select id="findByChatId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message
+        WHERE chat_id = #{chatId} AND is_deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.Message">
+        INSERT INTO message (id, conversation_id, chat_id, role, content, model, created_at, is_deleted)
+        VALUES (#{id}, #{conversationId}, #{chatId}, #{role}, #{content}, #{model}, #{createdAt}, #{isDeleted})
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO message (id, conversation_id, chat_id, role, content, model, created_at, is_deleted)
+        VALUES
+        <foreach collection="list" item="msg" separator=",">
+            (#{msg.id}, #{msg.conversationId}, #{msg.chatId}, #{msg.role}, #{msg.content}, #{msg.model}, #{msg.createdAt}, #{msg.isDeleted})
+        </foreach>
+    </insert>
+
+    <select id="countByChatId" resultType="int">
+        SELECT COUNT(*)
+        FROM message
+        WHERE chat_id = #{chatId} AND is_deleted = 0
+    </select>
+
+    <update id="deleteByChatId">
+        UPDATE message SET is_deleted = 1 WHERE chat_id = #{chatId}
+    </update>
+
+    <update id="deleteByConversationId">
+        UPDATE message SET is_deleted = 1 WHERE conversation_id = #{conversationId}
+    </update>
+
+    <select id="findLastByChatId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message
+        WHERE chat_id = #{chatId} AND is_deleted = 0
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectByChatIdRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message
+        WHERE chat_id = #{chatId} AND is_deleted = 0
+        ORDER BY created_at ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.UserProfileMapper">
+
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.UserProfile">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="bio" property="bio" jdbcType="LONGVARCHAR"/>
+        <result column="location" property="location" jdbcType="VARCHAR"/>
+        <result column="website" property="website" jdbcType="VARCHAR"/>
+        <result column="preferred_model" property="preferredModel" jdbcType="VARCHAR"/>
+        <result column="custom_api_key" property="customApiKey" jdbcType="VARCHAR"/>
+        <result column="notification_email" property="notificationEmail" jdbcType="TINYINT"/>
+        <result column="notification_system" property="notificationSystem" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, avatar_url, phone, bio, location, website, 
+        preferred_model, custom_api_key,
+        notification_email, notification_system, create_time, update_time
+    </sql>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_profile
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.UserProfile">
+        INSERT INTO user_profile (
+            id, user_id, avatar_url, phone, bio, location, website,
+            preferred_model, custom_api_key,
+            notification_email, notification_system
+        ) VALUES (
+            #{id}, #{userId}, #{avatarUrl}, #{phone}, #{bio}, #{location}, #{website},
+            #{preferredModel}, #{customApiKey},
+            #{notificationEmail}, #{notificationSystem}
+        )
+    </insert>
+
+    <update id="update" parameterType="zjc.knowledgemanager.entity.UserProfile">
+        UPDATE user_profile
+        <set>
+            <if test="avatarUrl != null">
+                avatar_url = #{avatarUrl},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="bio != null">
+                bio = #{bio},
+            </if>
+            <if test="location != null">
+                location = #{location},
+            </if>
+            <if test="website != null">
+                website = #{website},
+            </if>
+            <if test="preferredModel != null">
+                preferred_model = #{preferredModel},
+            </if>
+            <if test="customApiKey != null">
+                custom_api_key = #{customApiKey},
+            </if>
+            <if test="notificationEmail != null">
+                notification_email = #{notificationEmail},
+            </if>
+            <if test="notificationSystem != null">
+                notification_system = #{notificationSystem},
+            </if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteByUserId">
+        DELETE FROM user_profile WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

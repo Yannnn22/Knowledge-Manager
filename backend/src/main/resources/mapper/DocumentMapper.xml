@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.DocumentMapper">
+
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.Document">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="knowledge_base_id" property="knowledgeBaseId" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="file_path" property="filePath" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, knowledge_base_id, name, file_path, status, create_time, update_time, is_deleted
+    </sql>
+
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.Document" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO knowledge_document (id, knowledge_base_id, name, file_path, status, is_deleted)
+        VALUES (#{id}, #{knowledgeBaseId}, #{name}, #{filePath}, #{status}, #{isDeleted})
+    </insert>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </select>
+
+    <select id="findByKnowledgeBaseId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document
+        WHERE knowledge_base_id = #{knowledgeBaseId} AND (is_deleted = 0 OR is_deleted IS NULL)
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="findByKnowledgeBaseIdAndStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document
+        WHERE knowledge_base_id = #{knowledgeBaseId} AND status = #{status} AND (is_deleted = 0 OR is_deleted IS NULL)
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE knowledge_document
+        SET status = #{status}, update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </update>
+
+    <update id="update">
+        UPDATE knowledge_document
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="knowledgeBaseId != null">knowledge_base_id = #{knowledgeBaseId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateTime == null">update_time = CURRENT_TIMESTAMP,</if>
+        </set>
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </update>
+
+    <update id="updateProcessTime">
+        UPDATE knowledge_document
+        SET update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </update>
+
+    <update id="archiveDocument">
+        UPDATE knowledge_document
+        SET status = 'failed', update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </update>
+
+    <select id="searchByKnowledgeBaseIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document
+        <where>
+            <if test="knowledgeBaseIds != null and knowledgeBaseIds.size > 0">
+                knowledge_base_id IN
+                <foreach collection="knowledgeBaseIds" item="kbId" open="(" separator="," close=")">
+                    #{kbId}
+                </foreach>
+            </if>
+            <if test="knowledgeBaseIds == null or knowledgeBaseIds.size == 0">
+                1 = 0
+            </if>
+            AND (is_deleted = 0 OR is_deleted IS NULL)
+        </where>
+        ORDER BY ${sortColumn} ${direction}
+    </select>
+
+    <select id="checkUserPermission" resultType="int">
+        SELECT COUNT(*)
+        FROM knowledge_document d
+        JOIN knowledge_base kb ON d.knowledge_base_id = kb.id
+        JOIN user u ON u.id = #{userId}
+        WHERE d.id = #{documentId} 
+        AND (kb.owner_id = #{userId} OR u.status = 2)
+        AND (d.is_deleted = 0 OR d.is_deleted IS NULL)
+    </select>
+
+    <select id="findByUploaderId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document d
+        JOIN knowledge_base kb ON d.knowledge_base_id = kb.id
+        WHERE kb.owner_id = #{uploaderId} AND (d.is_deleted = 0 OR d.is_deleted IS NULL)
+        ORDER BY d.create_time DESC
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM knowledge_document WHERE (is_deleted = 0 OR is_deleted IS NULL)
+    </select>
+
+    <select id="findPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_document
+        WHERE (is_deleted = 0 OR is_deleted IS NULL)
+        ORDER BY ${sortColumn} ${direction}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <update id="softDeleteDocument">
+        UPDATE knowledge_document 
+        SET is_deleted = 1, update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND (is_deleted = 0 OR is_deleted IS NULL)
+    </update>
+
+    <delete id="physicalDeleteDocument">
+        DELETE FROM knowledge_document WHERE id = #{id}
+    </delete>
+
+    <select id="findPageByUserPermission" resultMap="BaseResultMap">
+        SELECT d.id, d.knowledge_base_id, d.name, d.file_path, d.status, d.create_time, d.update_time, d.is_deleted
+        FROM knowledge_document d
+        JOIN knowledge_base kb ON d.knowledge_base_id = kb.id
+        <where>
+            (d.is_deleted = 0 OR d.is_deleted IS NULL)
+            AND (kb.is_deleted = 0 OR kb.is_deleted IS NULL)
+            <!-- 管理员可以查看所有文档，普通用户只能查看自己拥有的知识库中的文档 -->
+            <if test="isAdmin != true">
+                AND kb.owner_id = #{userId}
+            </if>
+            <if test="knowledgeBaseIds != null and knowledgeBaseIds.size > 0">
+                AND d.knowledge_base_id IN
+                <foreach collection="knowledgeBaseIds" item="kbId" open="(" separator="," close=")">
+                    #{kbId}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND d.status = CASE 
+                    WHEN #{status} = 1 THEN 'processing'
+                    WHEN #{status} = 2 THEN 'completed'
+                    WHEN #{status} = 3 THEN 'failed'
+                    ELSE 'processing'
+                END
+            </if>
+        </where>
+        ORDER BY d.${sortColumn} ${direction}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByUserPermission" resultType="long">
+        SELECT COUNT(d.id)
+        FROM knowledge_document d
+        JOIN knowledge_base kb ON d.knowledge_base_id = kb.id
+        <where>
+            (d.is_deleted = 0 OR d.is_deleted IS NULL)
+            AND (kb.is_deleted = 0 OR kb.is_deleted IS NULL)
+            <!-- 管理员可以查看所有文档，普通用户只能查看自己拥有的知识库中的文档 -->
+            <if test="isAdmin != true">
+                AND kb.owner_id = #{userId}
+            </if>
+            <if test="knowledgeBaseIds != null and knowledgeBaseIds.size > 0">
+                AND d.knowledge_base_id IN
+                <foreach collection="knowledgeBaseIds" item="kbId" open="(" separator="," close=")">
+                    #{kbId}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND d.status = CASE 
+                    WHEN #{status} = 1 THEN 'processing'
+                    WHEN #{status} = 2 THEN 'completed'
+                    WHEN #{status} = 3 THEN 'failed'
+                    ELSE 'processing'
+                END
+            </if>
+        </where>
+    </select>
+
+    <!-- Fetches a paginated list of documents for a specific knowledge base, including deleted ones -->
+    <select id="findAllDocumentsByKnowledgeBaseId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            knowledge_document
+        WHERE
+            knowledge_base_id = #{knowledgeBaseId}
+        ORDER BY
+            create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- Counts all documents for a specific knowledge base, including deleted ones -->
+    <select id="countAllDocumentsByKnowledgeBaseId" resultType="long">
+        SELECT
+            count(*)
+        FROM
+            knowledge_document
+        WHERE
+            knowledge_base_id = #{knowledgeBaseId}
+    </select>
+
+</mapper>

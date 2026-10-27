@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识管理系统 API 文档</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #007bff; margin-top: 30px; }
+        h3 { color: #555; margin-top: 20px; }
+        .endpoint { background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff; border-radius: 4px; }
+        .method { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; margin-right: 10px; }
+        .get { background-color: #28a745; }
+        .post { background-color: #007bff; }
+        .put { background-color: #ffc107; color: #000; }
+        .delete { background-color: #dc3545; }
+        .path { font-family: monospace; background: #e9ecef; padding: 2px 6px; border-radius: 3px; }
+        .example { background: #f1f3f4; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status { margin-top: 20px; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; }
+        .test-section { margin-top: 30px; padding: 20px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 知识管理系统 API 文档</h1>
+        
+        <div class="status">
+            <h3>✅ 系统状态</h3>
+            <p><strong>服务地址:</strong> http://localhost:8080</p>
+            <p><strong>状态:</strong> <span style="color: green;">运行中</span></p>
+            <p><strong>版本:</strong> v1.0.0</p>
+        </div>
+
+        <h2>🔐 认证接口</h2>
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="path">/api/v1/auth/login</span>
+            <p><strong>描述:</strong> 用户登录</p>
+            <p><strong>请求体:</strong></p>
+            <div class="example">
+                <pre>{
+  "username": "admin",
+  "password": "admin123"
+}</pre>
+            </div>
+            <p><strong>测试命令:</strong></p>
+            <div class="example">
+                <pre>curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'</pre>
+            </div>
+        </div>
+
+        <h2>👥 用户管理接口</h2>
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="path">/api/v1/users</span>
+            <p><strong>描述:</strong> 获取用户列表（需要认证）</p>
+            <p><strong>Headers:</strong> Authorization: Bearer {token}</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="path">/api/v1/users</span>
+            <p><strong>描述:</strong> 创建用户（需要认证）</p>
+        </div>
+
+        <h2>📚 知识库管理接口</h2>
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="path">/api/v1/knowledge-bases</span>
+            <p><strong>描述:</strong> 获取知识库列表（需要认证）</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="path">/api/v1/knowledge-bases</span>
+            <p><strong>描述:</strong> 创建知识库（需要认证）</p>
+        </div>
+
+        <h2>📄 文档管理接口</h2>
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="path">/api/v1/documents/upload</span>
+            <p><strong>描述:</strong> 上传文档（需要认证）</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="path">/api/v1/documents/search</span>
+            <p><strong>描述:</strong> 搜索文档（需要认证）</p>
+        </div>
+
+        <h2>📊 操作日志接口</h2>
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="path">/api/v1/operation-logs</span>
+            <p><strong>描述:</strong> 查询操作日志（需要管理员权限）</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 快速测试</h3>
+            <p>1. 首先登录获取Token:</p>
+            <div class="example">
+                <pre>curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'</pre>
+            </div>
+            
+            <p>2. 使用返回的Token访问其他接口:</p>
+            <div class="example">
+                <pre>curl -X GET http://localhost:8080/api/v1/users \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</pre>
+            </div>
+            
+            <p><strong>默认测试账户:</strong></p>
+            <ul>
+                <li>管理员: admin / admin123</li>
+                <li>普通用户: user / user123</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; color: #666;">
+            <p>📖 更多详细信息请参考项目 README.md 文件</p>
+            <p>🔧 技术栈: Spring Boot 3.5.4 + MyBatis + MySQL + JWT</p>
+        </div>
+    </div>
+</body>
+</html>

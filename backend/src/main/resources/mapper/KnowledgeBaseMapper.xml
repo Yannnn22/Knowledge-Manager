@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.KnowledgeBaseMapper">
+
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.KnowledgeBase">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="owner_id" property="ownerId" jdbcType="BIGINT"/>
+        <result column="department" property="department" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, description, owner_id, department, create_time, update_time, is_deleted
+    </sql>
+
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.KnowledgeBase" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO knowledge_base (id, name, description, owner_id, department, is_deleted)
+        VALUES (#{id}, #{name}, #{description}, #{ownerId}, #{department}, #{isDeleted})
+    </insert>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_base
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="findByOwnerId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_base
+        WHERE owner_id = #{ownerId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="findByDepartment" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_base
+        WHERE department = #{department} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="findByOwnerIdAndDepartment" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_base
+        WHERE owner_id = #{ownerId} AND department = #{department} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_base
+        WHERE is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="getDocumentCount" resultType="int">
+        SELECT COUNT(*)
+        FROM knowledge_document
+        WHERE knowledge_base_id = #{knowledgeBaseId} AND is_deleted = 0
+    </select>
+
+    <select id="getStats" resultType="zjc.knowledgemanager.mapper.KnowledgeBaseMapper$KnowledgeBaseStats">
+        SELECT 
+            COUNT(*) as totalDocuments,
+            SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
+        FROM knowledge_document
+        WHERE knowledge_base_id = #{knowledgeBaseId} AND is_deleted = 0
+    </select>
+
+    <select id="countByName" resultType="int">
+        SELECT COUNT(*)
+        FROM knowledge_base
+        WHERE name = #{name} AND is_deleted = 0
+    </select>
+
+    <select id="countByNameExcludingId" resultType="int">
+        SELECT COUNT(*)
+        FROM knowledge_base
+        WHERE name = #{name} AND id != #{id} AND is_deleted = 0
+    </select>
+
+    <update id="updateSelective" parameterType="zjc.knowledgemanager.entity.KnowledgeBase">
+        UPDATE knowledge_base
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="department != null and department != ''">department = #{department},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="softDelete">
+        UPDATE knowledge_base SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <select id="countProcessingDocuments" resultType="int">
+        SELECT COUNT(*) FROM knowledge_document
+        WHERE knowledge_base_id = #{knowledgeBaseId} AND status = 'processing' AND is_deleted = 0
+    </select>
+
+</mapper> 

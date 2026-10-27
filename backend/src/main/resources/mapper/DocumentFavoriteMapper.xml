@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.DocumentFavoriteMapper">
+
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.DocumentFavorite">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="document_id" property="documentId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="FavoriteDocumentItemResultMap" type="zjc.knowledgemanager.dto.DocumentFavoriteResponse$FavoriteDocumentItem">
+        <result column="document_id" property="documentId" jdbcType="BIGINT"/>
+        <result column="original_filename" property="originalFilename" jdbcType="VARCHAR"/>
+        <result column="file_type" property="fileType" jdbcType="VARCHAR"/>
+        <result column="file_size" property="fileSize" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="status_text" property="statusText" jdbcType="VARCHAR"/>
+        <result column="knowledge_base_id" property="knowledgeBaseId" jdbcType="BIGINT"/>
+        <result column="knowledge_base_name" property="knowledgeBaseName" jdbcType="VARCHAR"/>
+        <result column="favorite_time" property="favoriteTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, document_id, create_time
+    </sql>
+
+    <select id="findByUserIdAndDocumentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM document_favorite
+        WHERE user_id = #{userId} AND document_id = #{documentId}
+    </select>
+
+    <select id="findFavoriteDocumentsByUserId" resultMap="FavoriteDocumentItemResultMap">
+        SELECT 
+            d.id as document_id,
+            d.original_filename,
+            d.file_type,
+            d.file_size,
+            d.status,
+            CASE d.status
+                WHEN 0 THEN '上传中'
+                WHEN 1 THEN '处理中'
+                WHEN 2 THEN '完成'
+                WHEN 3 THEN '失败'
+                WHEN 4 THEN '已归档'
+                ELSE '未知'
+            END as status_text,
+            d.knowledge_base_id,
+            kb.name as knowledge_base_name,
+            df.create_time as favorite_time
+        FROM document_favorite df
+        INNER JOIN knowledge_document d ON df.document_id = d.id
+        INNER JOIN knowledge_base kb ON d.knowledge_base_id = kb.id
+        WHERE df.user_id = #{userId} AND d.is_deleted = 0 AND kb.is_deleted = 0
+        ORDER BY df.create_time DESC
+    </select>
+
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM document_favorite df
+        INNER JOIN knowledge_document d ON df.document_id = d.id
+        WHERE df.user_id = #{userId} AND d.is_deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.DocumentFavorite">
+        INSERT INTO document_favorite (
+            id, user_id, document_id
+        ) VALUES (
+            #{id}, #{userId}, #{documentId}
+        )
+    </insert>
+
+    <delete id="deleteByUserIdAndDocumentId">
+        DELETE FROM document_favorite 
+        WHERE user_id = #{userId} AND document_id = #{documentId}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM document_favorite WHERE user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByDocumentId">
+        DELETE FROM document_favorite WHERE document_id = #{documentId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zjc.knowledgemanager.mapper.OperationLogMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="zjc.knowledgemanager.entity.OperationLog">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="operation" property="operation" jdbcType="VARCHAR"/>
+        <result column="target_type" property="targetType" jdbcType="VARCHAR"/>
+        <result column="target_id" property="targetId" jdbcType="BIGINT"/>
+        <result column="operation_time" property="operationTime" jdbcType="TIMESTAMP"/>
+        <result column="ip_address" property="ipAddress" jdbcType="VARCHAR"/>
+        <result column="detail" property="detail" jdbcType="VARCHAR"/>
+        <!-- 关联用户信息 -->
+        <association property="user" javaType="zjc.knowledgemanager.entity.User">
+            <id column="u_id" property="id" jdbcType="BIGINT"/>
+            <result column="u_username" property="username" jdbcType="VARCHAR"/>
+            <result column="u_real_name" property="realName" jdbcType="VARCHAR"/>
+            <result column="u_department" property="department" jdbcType="VARCHAR"/>
+        </association>
+    </resultMap>
+
+    <!-- 插入操作日志 -->
+    <insert id="insert" parameterType="zjc.knowledgemanager.entity.OperationLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO operation_log (
+            id, user_id, operation, target_type, target_id, 
+            operation_time, ip_address, detail
+        ) VALUES (
+            #{id}, #{userId}, #{operation}, #{targetType}, #{targetId}, 
+            #{operationTime}, #{ipAddress}, #{detail}
+        )
+    </insert>
+
+    <!-- 分页查询操作日志 -->
+    <select id="selectByPage" resultMap="BaseResultMap">
+        SELECT 
+            ol.id,
+            ol.user_id,
+            ol.operation,
+            ol.target_type,
+            ol.target_id,
+            ol.operation_time,
+            ol.ip_address,
+            ol.detail,
+            u.id as u_id,
+            u.username as u_username,
+            u.real_name as u_real_name,
+            u.department as u_department
+        FROM operation_log ol
+        LEFT JOIN user u ON ol.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND ol.user_id = #{userId}
+            </if>
+            <if test="operation != null and operation != ''">
+                AND ol.operation = #{operation}
+            </if>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY ol.operation_time DESC
+    </select>
+
+    <!-- 分页查询操作日志（支持更多筛选条件） -->
+    <select id="selectByPageWithFilters" resultMap="BaseResultMap">
+        SELECT 
+            ol.id,
+            ol.user_id,
+            ol.operation,
+            ol.target_type,
+            ol.target_id,
+            ol.operation_time,
+            ol.ip_address,
+            ol.detail,
+            u.id as u_id,
+            u.username as u_username,
+            u.real_name as u_real_name,
+            u.department as u_department
+        FROM operation_log ol
+        LEFT JOIN user u ON ol.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND ol.user_id = #{userId}
+            </if>
+            <if test="operation != null and operation != ''">
+                AND ol.operation = #{operation}
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND ol.operation = #{operationType}
+            </if>
+            <if test="username != null and username != ''">
+                AND u.username = #{username}
+            </if>
+            <if test="status != null and status != ''">
+                AND ol.detail LIKE CONCAT('%', #{status}, '%')
+            </if>
+            <if test="targetType != null and targetType != ''">
+                AND ol.target_type = #{targetType}
+            </if>
+            <if test="targetId != null">
+                AND ol.target_id = #{targetId}
+            </if>
+            <if test="knowledgeBaseId != null">
+                AND ol.target_id = #{knowledgeBaseId} AND ol.target_type = 'knowledge_base'
+            </if>
+            <if test="query != null and query != ''">
+                AND (ol.operation LIKE CONCAT('%', #{query}, '%') 
+                     OR ol.target_type LIKE CONCAT('%', #{query}, '%')
+                     OR u.username LIKE CONCAT('%', #{query}, '%')
+                     OR u.real_name LIKE CONCAT('%', #{query}, '%'))
+            </if>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY ol.operation_time DESC
+    </select>
+
+    <!-- 查询操作日志总数 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM operation_log ol
+        <where>
+            <if test="userId != null">
+                AND ol.user_id = #{userId}
+            </if>
+            <if test="operation != null and operation != ''">
+                AND ol.operation = #{operation}
+            </if>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+    
+    <!-- 查询操作日志总数（支持更多筛选条件） -->
+    <select id="countByConditionWithFilters" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM operation_log ol
+        LEFT JOIN user u ON ol.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND ol.user_id = #{userId}
+            </if>
+            <if test="operation != null and operation != ''">
+                AND ol.operation = #{operation}
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND ol.operation = #{operationType}
+            </if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND ol.detail LIKE CONCAT('%', #{status}, '%')
+            </if>
+            <if test="targetType != null and targetType != ''">
+                AND ol.target_type = #{targetType}
+            </if>
+            <if test="targetId != null">
+                AND ol.target_id = #{targetId}
+            </if>
+            <if test="knowledgeBaseId != null">
+                AND ol.target_id = #{knowledgeBaseId} AND ol.target_type = 'knowledge_base'
+            </if>
+            <if test="query != null and query != ''">
+                AND (ol.operation LIKE CONCAT('%', #{query}, '%') 
+                     OR ol.target_type LIKE CONCAT('%', #{query}, '%')
+                     OR u.username LIKE CONCAT('%', #{query}, '%')
+                     OR u.real_name LIKE CONCAT('%', #{query}, '%'))
+            </if>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询敏感操作日志 -->
+    <select id="selectSensitiveOperations" resultMap="BaseResultMap">
+        SELECT 
+            ol.id,
+            ol.user_id,
+            ol.operation,
+            ol.target_type,
+            ol.target_id,
+            ol.operation_time,
+            ol.ip_address,
+            ol.detail
+        FROM operation_log ol
+        WHERE ol.operation IN (
+            'DELETE_USER', 'DELETE_KNOWLEDGE_BASE', 'DELETE_DOCUMENT',
+            'UPDATE_USER_STATUS', 'ARCHIVE_DOCUMENT', 'BULK_DELETE'
+        )
+        ORDER BY ol.operation_time DESC
+        LIMIT 100
+    </select>
+
+    <!-- 查询指定时间范围内的操作日志（用于导出） -->
+    <select id="selectForExport" resultMap="BaseResultMap">
+        SELECT 
+            ol.id,
+            ol.user_id,
+            ol.operation,
+            ol.target_type,
+            ol.target_id,
+            ol.operation_time,
+            ol.ip_address,
+            ol.detail,
+            u.id as u_id,
+            u.username as u_username,
+            u.real_name as u_real_name,
+            u.department as u_department
+        FROM operation_log ol
+        LEFT JOIN user u ON ol.user_id = u.id
+        <where>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY ol.operation_time DESC
+    </select>
+
+    <!-- 查询指定时间范围内的操作日志（用于统计） -->
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT 
+            ol.id,
+            ol.user_id,
+            ol.operation,
+            ol.target_type,
+            ol.target_id,
+            ol.operation_time,
+            ol.ip_address,
+            ol.detail
+        FROM operation_log ol
+        <where>
+            <if test="startTime != null">
+                AND ol.operation_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ol.operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY ol.operation_time DESC
+    </select>
+
+</mapper>

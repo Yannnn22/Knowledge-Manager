@@ -1,0 +1,31 @@
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.iml
+
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+target/
+*.class
+
+# Local runtime data
+uploads/
+volumes/
+*.log
+logs/
+
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+backend/src/main/resources/application-local.properties
+
+# Frontend env templates that are safe to keep
+!frontend/.env.development
+!frontend/.env.example

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 模型配置 - 知识管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* 登录区域 */
+        .login-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .login-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.875rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            height: 42px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.05rem;
+        }
+
+        /* 配置区域 */
+        .config-section {
+            margin-top: 20px;
+        }
+
+        .config-section h3 {
+            font-size: 1.15rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .config-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .config-card .card-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .config-card .card-value {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .config-card .card-value.empty {
+            color: #aaa;
+            font-style: italic;
+        }
+
+        /* 提示信息 */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .hidden { display: none; }
+
+        /* Token 显示 */
+        .token-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        /* 加载动画 */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI 智能助手配置</h1>
+            <p>配置对话模型与 API Key，打造专属智能秘书</p>
+        </div>
+
+        <div class="content">
+            <!-- 登录区域 -->
+            <div id="loginSection" class="login-section">
+                <h3>登录</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="username" placeholder="请输入用户名" value="admin">
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="password" placeholder="请输入密码" value="123456">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 auto;">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="login()">登录</button>
+                    </div>
+                </div>
+                <p style="margin-top:10px; font-size:0.8rem; color:#999;">测试账号: admin / 123456</p>
+            </div>
+
+            <!-- 配置区域（登录后显示） -->
+            <div id="configSection" class="hidden">
+                <!-- 当前配置信息 -->
+                <div class="config-section">
+                    <h3>当前配置</h3>
+
+                    <div class="config-card">
+                        <div class="card-label">当前使用的模型</div>
+                        <div class="card-value" id="currentModel">加载中...</div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="card-label">API Key 状态</div>
+                        <div class="card-value" id="currentApiKeyStatus">加载中...</div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="card-label">用户信息</div>
+                        <div class="card-value" id="currentUserInfo">加载中...</div>
+                    </div>
+                </div>
+
+                <!-- 消息提示 -->
+                <div id="messageBox"></div>
+
+                <!-- 修改配置 -->
+                <div class="config-section" style="margin-top: 30px;">
+                    <h3>修改配置</h3>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>选择模型</label>
+                        <select id="preferredModel">
+                            <option value="">使用系统默认</option>
+                            <option value="Qwen/Qwen3-8B">Qwen/Qwen3-8B（通义千问3 8B）</option>
+                            <option value="Qwen/Qwen2.5-72B-Instruct">Qwen/Qwen2.5-72B-Instruct（通义千问2.5 72B）</option>
+                            <option value="deepseek-ai/DeepSeek-V3">DeepSeek-V3（深度求索V3）</option>
+                        </select>
+                        <p style="font-size:0.8rem; color:#999; margin-top:4px;">
+                            选择 "使用系统默认" 时将使用全局默认模型 Qwen/Qwen3-8B
+                        </p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label>自定义 API Key</label>
+                        <input type="password" id="customApiKey" placeholder="输入你的 SiliconFlow API Key（留空使用系统默认）">
+                        <button type="button" style="font-size:0.8rem; background:none; border:none; color:#4f46e5; cursor:pointer; padding:4px 0;" onclick="toggleApiKeyVisibility()">
+                            显示/隐藏
+                        </button>
+                        <p style="font-size:0.8rem; color:#999; margin-top:4px;">
+                            API Key 将加密存储于数据库中，仅用于本用户的智能助手调用
+                        </p>
+                    </div>
+
+                    <button class="btn btn-primary btn-save" onclick="saveConfig()">
+                        <span id="saveSpinner" class="spinner hidden"></span>
+                        保存配置
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ 状态管理 ============
+        const API_BASE = '';
+        let authToken = localStorage.getItem('authToken') || '';
+        let currentProfile = null;
+
+        // ============ 登录 ============
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                showMessage('请输入用户名和密码', 'error');
+                return;
+            }
+
+            try {
+                const resp = await fetch(API_BASE + '/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await resp.json();
+
+                if (data.code === 200) {
+                    authToken = data.data.token;
+                    localStorage.setItem('authToken', authToken);
+                    showMessage('登录成功', 'success');
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('configSection').classList.remove('hidden');
+                    loadProfile();
+                } else {
+                    showMessage(data.message || '登录失败', 'error');
+                }
+            } catch (e) {
+                showMessage('网络错误: ' + e.message, 'error');
+            }
+        }
+
+        // ============ 加载配置 ============
+        async function loadProfile() {
+            try {
+                const resp = await fetch(API_BASE + '/api/v1/users/profile', {
+                    headers: { 'Authorization': 'Bearer ' + authToken }
+                });
+                const data = await resp.json();
+
+                if (data.code === 200) {
+                    currentProfile = data.data;
+                    renderCurrentConfig(currentProfile);
+
+                    // 回填表单
+                    const modelSelect = document.getElementById('preferredModel');
+                    const modelVal = currentProfile.preferredModel || '';
+                    modelSelect.value = modelVal;
+
+                    const apiKeyInput = document.getElementById('customApiKey');
+                    apiKeyInput.value = currentProfile.customApiKey || '';
+                } else {
+                    showMessage('加载配置失败: ' + data.message, 'error');
+                }
+            } catch (e) {
+                showMessage('网络错误: ' + e.message, 'error');
+            }
+        }
+
+        function renderCurrentConfig(profile) {
+            // 当前模型
+            const modelEl = document.getElementById('currentModel');
+            if (profile.preferredModel) {
+                modelEl.innerHTML = `<strong>${profile.preferredModel}</strong> <span class="token-badge">用户配置</span>`;
+            } else {
+                modelEl.innerHTML = '<strong>qwen-plus（系统默认）</strong> <span class="token-badge">默认</span>';
+            }
+
+            // API Key 状态
+            const keyEl = document.getElementById('currentApiKeyStatus');
+            if (profile.customApiKey) {
+                const masked = profile.customApiKey.substring(0, 4) + '****' + profile.customApiKey.substring(profile.customApiKey.length - 4);
+                keyEl.innerHTML = `<strong style="color:#065f46;">已配置</strong> (${masked})`;
+            } else {
+                keyEl.innerHTML = '<span style="color:#aaa;">使用系统默认 API Key</span>';
+            }
+
+            // 用户信息
+            const userEl = document.getElementById('currentUserInfo');
+            userEl.innerHTML = `${profile.realName || profile.userId} · ${profile.department || ''} ${profile.isAdmin ? '<span class="token-badge">管理员</span>' : ''}`;
+        }
+
+        // ============ 保存配置 ============
+        async function saveConfig() {
+            const preferredModel = document.getElementById('preferredModel').value || null;
+            const customApiKey = document.getElementById('customApiKey').value.trim() || null;
+
+            setSaveLoading(true);
+
+            try {
+                const body = {
+                    userId: currentProfile.userId,
+                    preferredModel: preferredModel,
+                    customApiKey: customApiKey
+                };
+
+                const resp = await fetch(API_BASE + '/api/v1/users/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await resp.json();
+
+                if (data.code === 200) {
+                    showMessage('配置保存成功！下次智能助手对话将使用新配置。', 'success');
+                    loadProfile(); // 刷新显示
+                } else {
+                    showMessage('保存失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (e) {
+                showMessage('网络错误: ' + e.message, 'error');
+            } finally {
+                setSaveLoading(false);
+            }
+        }
+
+        function setSaveLoading(loading) {
+            const btn = document.querySelector('.btn-save');
+            const spinner = document.getElementById('saveSpinner');
+            btn.disabled = loading;
+            spinner.classList.toggle('hidden', !loading);
+        }
+
+        // ============ 辅助 ============
+        function showMessage(msg, type) {
+            const box = document.getElementById('messageBox');
+            const cls = 'alert alert-' + type;
+            box.innerHTML = `<div class="${cls}">${msg}</div>`;
+            setTimeout(() => { box.innerHTML = ''; }, 5000);
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('customApiKey');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // ============ 初始化 ============
+        window.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('configSection').classList.remove('hidden');
+                loadProfile();
+            }
+        });
+    </script>
+</body>
+</html>

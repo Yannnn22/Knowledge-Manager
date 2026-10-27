@@ -1,0 +1,9 @@
+dashScope:
+  - name: Qwen/Qwen3-8B
+    description: 通义千问3 8B（128k上下文，推荐默认）
+  - name: Qwen/Qwen2.5-72B-Instruct
+    description: 通义千问2.5 72B（高质量）
+  - name: deepseek-ai/DeepSeek-V3
+    description: DeepSeek V3（推理增强）
+  - name: Pro/deepseek-ai/DeepSeek-R1
+    description: DeepSeek R1（深度推理）
